@@ -1,0 +1,5 @@
+fastapi==0.99.0
+uvicorn[standard]
+sentry-sdk[fastapi]
+mangum
+pymongo[srv]

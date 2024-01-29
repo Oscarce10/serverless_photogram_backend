@@ -1,0 +1,15 @@
+trigger:
+  - serverless
+
+resources:
+    repositories:
+      - repository: templates
+        type: git
+        name: Personal Projects/pipeline_base_templates
+
+
+
+extends:
+  template: python_serverless.yml@templates
+  parameters:
+    repository: photogram-backend

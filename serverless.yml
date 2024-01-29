@@ -1,0 +1,65 @@
+# If using domain and certificate, run `sls create-cert`, and `sls create_domain` before `sls deploy`
+org: ${file(./.env.json):ORG, "default"}
+service: photogram-api-FastAPI
+package:
+    individually: true
+provider:
+    name: aws
+    runtime: python3.10
+    memorySize: 128
+    timeout: 30
+    apiGateway:
+        apiKeys:
+            - value: ${file(./.env.json):API_KEY, "default"}
+        description: API key for Photogram API
+plugins:
+    - serverless-python-requirements
+    - serverless-domain-manager
+    - serverless-certificate-creator
+custom:
+   domains:
+       # References to 'prod' stage
+       prod:
+           domainName: photogram-api.${file(./.env.json):DOMAIN, "default"}
+           certificateName: photogram-api.${file(./.env.json):DOMAIN, "default"}
+   # Amazon Certificate Manager
+   customCertificate:
+       hostedZoneNames: ${file(./.env.json):DOMAIN, "default"}. # don't forget the dot on the end - is required by Route53
+       certificateName: photogram-api.${file(./.env.json):DOMAIN, "default"}
+       region: us-east-1
+
+   # Route53
+   customDomain:
+       domainName: photogram-api.${file(./.env.json):DOMAIN, "default"}
+       certificateName: photogram-api.${file(./.env.json):DOMAIN, "default"}
+       createRoute53Record: true
+       autoDomain: true
+
+functions:
+    app:
+        package:
+            patterns:
+                - "app/**"
+                - "!requirements.txt"
+                - "!package.json"
+                - "!package-lock.json"
+                - "!.serverless/**"
+                - "!venv/**"
+                - "!node_modules/**"
+                - "!.env*"
+        handler: config.handler
+        environment:
+            MONGO_URI: ${file(./.env.json):MONGO_URI, "default"}
+            SENTRY_DSN: ${file(./.env.json):SENTRY_DSN, "default"}
+            DOMAIN: ${file(./.env.json):DOMAIN, "default"}
+            ORIGINS: ${file(./.env.json):ORIGINS, "default"}
+        events:
+            - http:
+                  method: get
+                  path: /
+                  cors: true
+            - http:
+                  method: any
+                  path: /{proxy+}
+                  cors: true
+#          private: true

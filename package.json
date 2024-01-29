@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "serverless-add-api-key": "^4.2.1",
+    "serverless-certificate-creator": "^1.6.0",
+    "serverless-domain-manager": "^6.2.1",
+    "serverless-python-requirements": "^6.0.0"
+  }
+}
